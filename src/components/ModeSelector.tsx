@@ -4,35 +4,51 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { listModTree } from "../lib/tydClient";
 
 export function ModeSelector() {
-  const { setMode, setModPath, setModName, setModTree } = useModStore();
+  const { setMode, setModPath, setModName, setModTree, addConsoleLog } = useModStore();
   const [hoveredMode, setHoveredMode] = useState<"simple" | "advanced" | null>(null);
 
   const handleOpenMod = async (mode: "simple" | "advanced") => {
-    const selected = await open({
-      directory: true,
-      multiple: false,
-      title: "Open Mod Folder",
-    });
-    if (selected) {
-      setModPath(selected as string);
-      const folderName = (selected as string).split(/[\\/]/).pop() || "Mod";
-      setModName(folderName);
-      const tree = await listModTree(selected as string);
-      setModTree(tree);
-      setMode(mode);
+    try {
+      addConsoleLog(`Opening folder dialog (${mode} mode)...`);
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: "Open Mod Folder",
+      });
+      addConsoleLog(`Selected: ${selected}`);
+      if (selected) {
+        const path = selected as string;
+        setModPath(path);
+        const folderName = path.split(/[\\/]/).pop() || "Mod";
+        setModName(folderName);
+        addConsoleLog(`Loading mod tree from ${path}...`);
+        const tree = await listModTree(path);
+        addConsoleLog(`Found ${tree.length} top-level items`);
+        setModTree(tree);
+        setMode(mode);
+      }
+    } catch (err) {
+      addConsoleLog(`ERROR: ${err}`);
+      console.error("handleOpenMod failed:", err);
     }
   };
 
   const handleNewMod = async (mode: "simple" | "advanced") => {
-    const selected = await open({
-      directory: true,
-      multiple: false,
-      title: "Select Parent Directory for New Mod",
-    });
-    if (selected) {
-      setModPath(selected as string);
-      setModName("New Mod");
-      setMode(mode);
+    try {
+      addConsoleLog(`Opening parent folder dialog...`);
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: "Select Parent Directory for New Mod",
+      });
+      if (selected) {
+        setModPath(selected as string);
+        setModName("New Mod");
+        setMode(mode);
+      }
+    } catch (err) {
+      addConsoleLog(`ERROR: ${err}`);
+      console.error("handleNewMod failed:", err);
     }
   };
 
@@ -46,7 +62,6 @@ export function ModeSelector() {
       </div>
 
       <div className="flex gap-8 mb-12">
-        {/* Simple Mode Card */}
         <button
           onClick={() => handleOpenMod("simple")}
           onMouseEnter={() => setHoveredMode("simple")}
@@ -57,7 +72,7 @@ export function ModeSelector() {
               : "bg-gray-800/60 border-gray-700 hover:border-gray-500"
           }`}
         >
-          <div className="text-3xl mb-4">🎨</div>
+          <div className="text-3xl mb-4">&#x1f3a8;</div>
           <h2 className="text-xl font-semibold mb-2">Simple Mode</h2>
           <p className="text-gray-400 text-sm leading-relaxed">
             Guided wizard UI. Pick a content type, fill in forms, save.
@@ -66,7 +81,6 @@ export function ModeSelector() {
           <p className="text-gray-500 text-xs mt-3">Best for beginners</p>
         </button>
 
-        {/* Advanced Mode Card */}
         <button
           onClick={() => handleOpenMod("advanced")}
           onMouseEnter={() => setHoveredMode("advanced")}
@@ -77,7 +91,7 @@ export function ModeSelector() {
               : "bg-gray-800/60 border-gray-700 hover:border-gray-500"
           }`}
         >
-          <div className="text-3xl mb-4">⌨️</div>
+          <div className="text-3xl mb-4">&#x2328;&#xfe0f;</div>
           <h2 className="text-xl font-semibold mb-2">Advanced Mode</h2>
           <p className="text-gray-400 text-sm leading-relaxed">
             Full IDE with file tree, raw TyD editing, tabs, inspector,
