@@ -1,5 +1,13 @@
 # Software Inc. Data Mod Studio
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tauri](https://img.shields.io/badge/Tauri-v2-blue.svg)](https://tauri.app/)
+[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![Rust](https://img.shields.io/badge/Rust-1.96-orange.svg)](https://www.rust-lang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6.svg)](https://www.typescriptlang.org/)
+[![GitHub stars](https://img.shields.io/github/stars/CodeNovaOrginal/SIDMS?style=social)](https://github.com/CodeNovaOrginal/SIDMS)
+[![GitHub last commit](https://img.shields.io/github/last-commit/CodeNovaOrginal/SIDMS)](https://github.com/CodeNovaOrginal/SIDMS)
+
 A visual, IDE-style editor for creating and editing **TyD data mods** for [Software Inc.](https://store.steampowered.com/app/362620/Software_Inc/). Build mods without hand-writing raw TyD syntax while still producing valid, game-loadable `.tyd` files.
 
 ## Features
