@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { ModTreeNode } from "../lib/tydClient";
 
 export type AppMode = "simple" | "advanced";
+export type ContentType = "softwareTypes" | "personalities" | "companyTypes" | "meta";
 
 export interface Tab {
   id: string;
@@ -24,6 +25,7 @@ interface ModStore {
   modPath: string | null;
   modName: string;
   modTree: ModTreeNode[];
+  contentType: ContentType;
   openTabs: Tab[];
   activeTab: string | null;
   validationErrors: ValidationError[];
@@ -34,6 +36,7 @@ interface ModStore {
   setModPath: (path: string) => void;
   setModName: (name: string) => void;
   setModTree: (tree: ModTreeNode[]) => void;
+  setContentType: (ct: ContentType) => void;
   openTab: (tab: Tab) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string | null) => void;
@@ -51,6 +54,7 @@ export const useModStore = create<ModStore>((set) => ({
   modPath: null,
   modName: "",
   modTree: [],
+  contentType: "softwareTypes",
   openTabs: [],
   activeTab: null,
   validationErrors: [],
@@ -61,6 +65,7 @@ export const useModStore = create<ModStore>((set) => ({
   setModPath: (path) => set({ modPath: path }),
   setModName: (name) => set({ modName: name }),
   setModTree: (tree) => set({ modTree: tree }),
+  setContentType: (ct) => set({ contentType: ct }),
 
   openTab: (tab) =>
     set((state) => {
@@ -126,6 +131,7 @@ export const useModStore = create<ModStore>((set) => ({
       modPath: null,
       modName: "",
       modTree: [],
+      contentType: "softwareTypes",
       openTabs: [],
       activeTab: null,
       validationErrors: [],
