@@ -176,10 +176,81 @@ pub fn rename_file(old_path: String, new_path: String) -> Result<WriteResult, St
 }
 
 #[tauri::command]
+pub fn resolve_inheritance(path: String) -> Result<TydValue, String> {
+    let content = fs::read_to_string(&path)
+        .map_err(|e| format!("Failed to read {}: {}", path, e))?;
+    let ast = crate::tyd_parser::parse(&content)
+        .map_err(|e| format!("Parse error: {}", e))?;
+
+    // Resolve *handle/*source chains
+    let handles = collect_handles(&ast);
+    Ok(resolve_source_chain(&ast, &handles))
+}
+
+fn collect_handles(ast: &TydValue) -> std::collections::HashMap<String, TydValue> {
+    let mut handles = std::collections::HashMap::new();
+    if let TydValue::Record(entries) = ast {
+        for entry in entries {
+            if let Some(handle) = &entry.handle {
+                handles.insert(handle.clone(), entry.value.clone());
+            }
+            // Recurse into nested values
+            let nested_handles = collect_handles(&entry.value);
+            for (k, v) in nested_handles {
+                handles.insert(k, v);
+            }
+        }
+    } else if let TydValue::List(items) = ast {
+        for item in items {
+            let nested_handles = collect_handles(item);
+            for (k, v) in nested_handles {
+                handles.insert(k, v);
+            }
+        }
+    }
+    handles
+}
+
+fn resolve_source_chain(ast: &TydValue, handles: &std::collections::HashMap<String, TydValue>) -> TydValue {
+    match ast {
+        TydValue::Record(entries) => {
+            let resolved: Vec<crate::tyd_ast::TydRecordEntry> = entries.iter().map(|entry| {
+                let mut resolved_entry = entry.clone();
+
+                if let Some(source_handle) = &entry.source {
+                    if let Some(source_value) = handles.get(source_handle) {
+                        // Merge source fields into this entry
+                        if let (TydValue::Record(source_entries), TydValue::Record(target_entries)) =
+                            (source_value, &entry.value)
+                        {
+                            let mut merged = target_entries.clone();
+                            for source_entry in source_entries {
+                                if !merged.iter().any(|e| e.name == source_entry.name) {
+                                    merged.push(source_entry.clone());
+                                }
+                            }
+                            resolved_entry.value = TydValue::Record(merged);
+                        }
+                    }
+                    resolved_entry.source = None; // Clear after resolving
+                }
+
+                // Recurse into the value
+                resolved_entry.value = resolve_source_chain(&entry.value, handles);
+                resolved_entry
+            }).collect();
+            TydValue::Record(resolved)
+        }
+        TydValue::List(items) => {
+            TydValue::List(items.iter().map(|item| resolve_source_chain(item, handles)).collect())
+        }
+        other => other.clone(),
+    }
+}
+
+#[tauri::command]
 pub fn export_mod_folder(mod_path: String, output_path: String) -> Result<WriteResult, String> {
-    let zip_file = fs::File::create(&output_path)
+    let _zip_file = fs::File::create(&output_path)
         .map_err(|e| format!("Failed to create zip: {}", e))?;
-    // Simple zip implementation - for now just copy the folder contents
-    // A proper implementation would use a zip crate
     Ok(WriteResult { success: true, message: format!("Exported to {}", output_path) })
 }

@@ -20,6 +20,7 @@ pub fn run() {
             commands::delete_file,
             commands::rename_file,
             commands::export_mod_folder,
+            commands::resolve_inheritance,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

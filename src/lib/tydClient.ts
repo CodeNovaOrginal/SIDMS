@@ -64,3 +64,7 @@ export async function renameFile(oldPath: string, newPath: string): Promise<Writ
 export async function exportModFolder(modPath: string, outputPath: string): Promise<WriteResult> {
   return invoke<WriteResult>("export_mod_folder", { modPath, outputPath });
 }
+
+export async function resolveInheritance(path: string): Promise<TydValue> {
+  return invoke<TydValue>("resolve_inheritance", { path });
+}
