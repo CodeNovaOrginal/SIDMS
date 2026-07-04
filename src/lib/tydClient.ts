@@ -61,6 +61,10 @@ export async function renameFile(oldPath: string, newPath: string): Promise<Writ
   return invoke<WriteResult>("rename_file", { oldPath, newPath });
 }
 
+export async function createFile(path: string, content: string): Promise<WriteResult> {
+  return invoke<WriteResult>("create_file", { path, content });
+}
+
 export async function exportModFolder(modPath: string, outputPath: string): Promise<WriteResult> {
   return invoke<WriteResult>("export_mod_folder", { modPath, outputPath });
 }

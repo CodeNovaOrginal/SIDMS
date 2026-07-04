@@ -103,6 +103,18 @@ pub fn new_mod_folder(parent_path: String, name: String) -> Result<String, Strin
 }
 
 #[tauri::command]
+pub fn create_file(path: String, content: String) -> Result<WriteResult, String> {
+    // Ensure parent directory exists
+    if let Some(parent) = std::path::Path::new(&path).parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create directory: {}", e))?;
+    }
+    fs::write(&path, &content)
+        .map_err(|e| format!("Failed to write {}: {}", path, e))?;
+    Ok(WriteResult { success: true, message: format!("Created {}", path) })
+}
+
+#[tauri::command]
 pub fn list_mod_tree(path: String) -> Result<Vec<ModTreeNode>, String> {
     let dir = std::path::Path::new(&path);
     if !dir.is_dir() {
@@ -249,7 +261,7 @@ fn resolve_source_chain(ast: &TydValue, handles: &std::collections::HashMap<Stri
 }
 
 #[tauri::command]
-pub fn export_mod_folder(mod_path: String, output_path: String) -> Result<WriteResult, String> {
+pub fn export_mod_folder(_mod_path: String, output_path: String) -> Result<WriteResult, String> {
     let _zip_file = fs::File::create(&output_path)
         .map_err(|e| format!("Failed to create zip: {}", e))?;
     Ok(WriteResult { success: true, message: format!("Exported to {}", output_path) })

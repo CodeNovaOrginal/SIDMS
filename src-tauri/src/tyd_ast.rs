@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// Represents a value in the TyD format
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

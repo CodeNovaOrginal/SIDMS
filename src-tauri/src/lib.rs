@@ -21,6 +21,7 @@ pub fn run() {
             commands::preview_tyd,
             commands::delete_file,
             commands::rename_file,
+            commands::create_file,
             commands::export_mod_folder,
             commands::resolve_inheritance,
         ])

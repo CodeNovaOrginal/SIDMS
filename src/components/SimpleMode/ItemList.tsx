@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useModStore, type ContentType } from "../../state/modStore";
 import type { ModTreeNode } from "../../lib/tydClient";
 import { FolderIcon, FolderOpenIcon, FileIcon, PlusIcon } from "../../assets/icons/Icons";
+import { createFile, listModTree } from "../../lib/tydClient";
 
 const CONTENT_TYPE_MAP: Record<ContentType, { folder?: string; file?: string; label: string }> = {
   softwareTypes: { folder: "SoftwareTypes", label: "Software Types" },
@@ -47,35 +48,33 @@ export function ItemList() {
 
   const handleNewFile = async () => {
     if (!newFileName.trim() || !modPath) return;
-    const { writeTydFile } = await import("../../lib/tydClient");
     try {
       let filePath: string;
-      if (config.folder) {
+      let content = "";
+
+      if (contentType === "softwareTypes") {
         const fileName = newFileName.endsWith(".tyd") ? newFileName : `${newFileName}.tyd`;
         filePath = `${modPath}/${config.folder}/${fileName}`;
-        // Create default TyD content based on content type
-        let content = "";
-        if (contentType === "softwareTypes") {
-          content = `SoftwareType\n{\n\tName\t\t"${newFileName}"\n\tDescription\t""\n\tSubmarketNames\t[ Sub1; Sub2; Sub3 ]\n\tOptimalDevTime\t30\n}`;
-        } else if (contentType === "companyTypes") {
-          content = `CompanyType\n{\n\tSpecialization\t"${newFileName}"\n\tPerYear\t\t0.2\n\tMin\t\t2\n\tMax\t\t4\n\tTypes\n\t\t[\n\t\t{\n\t\t\tSoftware\t"${newFileName}"\n\t\t\tChance\t\t1\n\t\t}\n\t\t]\n}`;
-        }
-        await writeTydFile(filePath, content);
+        content = "SoftwareType\n{\n\tName\t\t\"" + newFileName + "\"\n\tDescription\t\"\"\n\tSubmarketNames\t[ Sub1; Sub2; Sub3 ]\n\tOptimalDevTime\t30\n}";
+      } else if (contentType === "companyTypes") {
+        const fileName = newFileName.endsWith(".tyd") ? newFileName : `${newFileName}.tyd`;
+        filePath = `${modPath}/${config.folder}/${fileName}`;
+        content = "CompanyType\n{\n\tSpecialization\t\"" + newFileName + "\"\n\tPerYear\t\t0.2\n\tMin\t\t2\n\tMax\t\t4\n\tTypes\n\t\t[\n\t\t{\n\t\t\tSoftware\t\"" + newFileName + "\"\n\t\t\tChance\t\t1\n\t\t}\n\t\t]\n}";
       } else if (contentType === "personalities") {
         filePath = `${modPath}/Personalities.tyd`;
-        const content = `PersonalityGraph\n{\n\tPersonalities\n\t\t[\n\t\t{\n\t\t\tName\t\t${newFileName}\n\t\t\tTraits\t\t[ BornLeader ]\n\t\t}\n\t\t]\n\tIncompatibilities\n\t\t[\n\t\t]\n}`;
-        await writeTydFile(filePath, content);
+        content = "PersonalityGraph\n{\n\tPersonalities\n\t\t[\n\t\t{\n\t\t\tName\t\t" + newFileName + "\n\t\t\tTraits\t\t[ BornLeader ]\n\t\t}\n\t\t]\n\tIncompatibilities\n\t\t[\n\t\t]\n}";
       } else if (contentType === "meta") {
         filePath = `${modPath}/meta.tyd`;
-        const content = `Meta\n{\n\tName\t\t"${newFileName}"\n\tDescription\t""\n\tAuthor\t\t""\n}`;
-        await writeTydFile(filePath, content);
+        content = "Meta\n{\n\tName\t\t\"" + newFileName + "\"\n\tDescription\t\"\"\n\tAuthor\t\t\"\"\n}";
       } else {
         return;
       }
-      addConsoleLog(`Created: ${filePath}`);
+
+      addConsoleLog(`Creating ${filePath}...`);
+      const result = await createFile(filePath, content);
+      addConsoleLog(result.message);
 
       // Reload mod tree
-      const { listModTree } = await import("../../lib/tydClient");
       const tree = await listModTree(modPath);
       setModTree(tree);
 
@@ -89,7 +88,8 @@ export function ItemList() {
         fileType: "tyd",
       });
     } catch (err) {
-      addConsoleLog(`ERROR creating file: ${err}`);
+      addConsoleLog(`ERROR: ${err}`);
+      console.error("handleNewFile failed:", err);
     }
     setNewFileName("");
     setShowNewInput(false);
