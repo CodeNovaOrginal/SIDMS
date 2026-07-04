@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useModStore } from "../../state/modStore";
 import type { ModTreeNode } from "../../lib/tydClient";
+import { FolderIcon, FolderOpenIcon, FileIcon } from "../../assets/icons/Icons";
 
 export function ModFileTree() {
   const { modTree, openTab } = useModStore();
@@ -15,7 +16,7 @@ export function ModFileTree() {
       <div className="p-3 border-b border-gray-800 flex items-center justify-between">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Explorer</h3>
       </div>
-      <div className="flex-1 overflow-y-auto p-1">
+      <div className="flex-1 overflow-y-auto p-1.5">
         {modTree.map((node) => (
           <TreeNode
             key={node.path}
@@ -64,18 +65,19 @@ function TreeNode({
           if (node.is_dir) onToggle(node.path);
           else onSelect(node);
         }}
-        className="w-full text-left px-2 py-0.5 text-sm rounded hover:bg-gray-800 flex items-center gap-1"
+        className="w-full text-left px-2 py-0.5 text-sm rounded hover:bg-gray-800 flex items-center gap-1 group"
         style={{ paddingLeft: `${depth * 12 + 4}px` }}
       >
         {node.is_dir ? (
-          <span className="text-gray-500 text-[10px] w-3">{isExpanded ? "▼" : "▶"}</span>
+          <span className="text-gray-500 shrink-0">
+            {isExpanded ? <FolderOpenIcon className="w-4 h-4" /> : <FolderIcon className="w-4 h-4" />}
+          </span>
         ) : (
-          <span className="text-gray-600 text-[10px] w-3" />
+          <span className="text-gray-600 shrink-0">
+            <FileIcon className="w-4 h-4" />
+          </span>
         )}
-        <span className="text-[10px] mr-1">
-          {node.is_dir ? "📁" : node.file_type === "tyd" ? "📄" : "📝"}
-        </span>
-        <span className="text-gray-400 truncate">{node.name}</span>
+        <span className="text-gray-400 group-hover:text-gray-200 truncate">{node.name}</span>
       </button>
       {node.is_dir && isExpanded && node.children && (
         <div>

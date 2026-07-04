@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useModStore } from "../../state/modStore";
+import { FileTextIcon } from "../../assets/icons/Icons";
 
 export function EditorPane() {
   const { activeTab, openTabs } = useModStore();
@@ -10,6 +11,9 @@ export function EditorPane() {
     return (
       <div className="h-full flex items-center justify-center text-gray-600">
         <div className="text-center">
+          <div className="mb-3 text-gray-700">
+            <FileTextIcon className="w-10 h-10 mx-auto" />
+          </div>
           <p className="text-lg">No file selected</p>
           <p className="text-sm text-gray-700 mt-1">Open a file from the explorer</p>
         </div>
